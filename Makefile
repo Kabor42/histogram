@@ -18,7 +18,17 @@ OBJECT_FILES     = $(SOURCE_FILES:%.c=$(OBJ)/%.o)
 build: $(EXECUTABLE_FILES)
 
 clean:
-	rm -r -f $(BIN)
+	@echo Cleaning directories.
+	@rm -r -f $(BIN)
+	@rm -f fajlnev_hist.dat
+	@rm -f fájlnév
+	@rm -f fajlnev_hist.dat
+	@rm -f fajlnev_kum.dat
+	@rm -f hist.dat
+	@rm -f kum.dat
+	@rm -f photo1c1280x720_hist.dat
+	@rm -f u.dat
+	@echo Cleaning done.
 
 .PHONY: build clean
 
