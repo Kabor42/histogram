@@ -106,7 +106,7 @@ void betoltes(t_kep *kep, char *fajlnev) {
 
 void hisztogram_keszit(t_kep *kep, histogram *hiszt, unsigned int osztas) {
   unsigned char dv = (unsigned char)floor(256 / osztas);
-  hiszt->tomb = (hist_elem *)malloc(sizeof(hist_elem) * dv);
+  hiszt->tomb = (hist_elem *)malloc(sizeof(hist_elem) * osztas);
   hiszt->elemszam = osztas;
   for (size_t i = 0; i < hiszt->elemszam; i++) {
     hiszt->tomb[i].intervallum = (i * dv) + (unsigned char)floor(dv / 2);
@@ -145,8 +145,6 @@ void uj_ertek(histogram *eloszl, histogram *uj, size_t total) {
   for (size_t i = 0; i < uj->elemszam; i++) {
     uj->tomb[i].elemszam =
         (size_t)floor(255 * ((double)eloszl->tomb[i].elemszam / total));
-    printf("%zu %zu %f\n", i, uj->tomb[i].elemszam,
-           (double)eloszl->tomb[i].elemszam / total);
     uj->tomb[i].intervallum = eloszl->tomb[i].intervallum;
   }
 }
