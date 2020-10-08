@@ -36,23 +36,37 @@ int main(int argc, char *argv[]) {
   strcpy(fajlnev, argv[1]);
   printf("%s\n", fajlnev);
 
-  t_kep kep;
-  t_kep uj_kep;
-  histogram hist;
-  histogram eloszl;
+  t_kep kep, uj_kep;
+  histogram hist_16, hist, uj_hist;
+  histogram eloszl, uj_eloszl;
   histogram uj_ertekek;
   betoltes(&kep, fajlnev);
+
+  hisztogram_keszit(&kep, &hist_16, 16);
+  histogram_kiir(&hist_16, "hist.dat");
+
   hisztogram_keszit(&kep, &hist, 256);
-  histogram_kiir(&hist, "hist.dat");
   kumul_eloszlas(&hist, &eloszl);
+  histogram_kiir(&hist, "photo1c1280x720_hist.dat");
   histogram_kiir(&eloszl, "kum.dat");
+
   uj_ertek(&eloszl, &uj_ertekek, kep.elemszam);
   histogram_kiir(&uj_ertekek, "u.dat");
+
   normalize(&kep, &uj_kep, &uj_ertekek);
+
   kiiras(&uj_kep, "fájlnév");
 
+  hisztogram_keszit(&uj_kep, &uj_hist, 256);
+  kumul_eloszlas(&uj_hist, &uj_eloszl);
+  histogram_kiir(&uj_hist, "fajlnev_hist.dat");
+  histogram_kiir(&uj_eloszl, "fajlnev_kum.dat");
+
   free(hist.tomb);
+  free(hist_16.tomb);
+  free(uj_hist.tomb);
   free(eloszl.tomb);
+  free(uj_eloszl.tomb);
   free(kep.tomb);
   free(uj_kep.tomb);
   free(uj_ertekek.tomb);
