@@ -25,7 +25,7 @@ void betoltes(t_kep *, char *);
 void hisztogram_keszit(t_kep *, histogram *, unsigned int);
 void histogram_kiir(histogram *, char *);
 void kumul_eloszlas(histogram *, histogram *);
-void uj_ertek(histogram *, histogram *, size_t );
+void uj_ertek(histogram *, histogram *, size_t);
 void normalize(t_kep *, t_kep *, histogram *);
 void kiiras(t_kep *, char *);
 
@@ -109,7 +109,7 @@ void hisztogram_keszit(t_kep *kep, histogram *hiszt, unsigned int osztas) {
   hiszt->tomb = (hist_elem *)malloc(sizeof(hist_elem) * dv);
   hiszt->elemszam = osztas;
   for (size_t i = 0; i < hiszt->elemszam; i++) {
-    hiszt->tomb[i].intervallum = (i*dv) + (unsigned char)floor(dv/2);
+    hiszt->tomb[i].intervallum = (i * dv) + (unsigned char)floor(dv / 2);
     hiszt->tomb[i].elemszam = 0;
   }
   for (size_t i = 0; i < kep->elemszam; i++) {
@@ -130,11 +130,11 @@ void histogram_kiir(histogram *hiszt, char *fajlnev) {
 void kumul_eloszlas(histogram *hist, histogram *eloszl) {
   eloszl->tomb = (hist_elem *)malloc(sizeof(hist_elem) * hist->elemszam);
   eloszl->elemszam = hist->elemszam;
-  for(size_t i=0;i<eloszl->elemszam;i++)
+  for (size_t i = 0; i < eloszl->elemszam; i++)
     eloszl->tomb[i].elemszam = 0;
-  for( size_t i=0; i < hist->elemszam; i++) {
-      eloszl->tomb[i].intervallum = hist->tomb[i].intervallum;
-    for(size_t j=0; j<=i;j++) {
+  for (size_t i = 0; i < hist->elemszam; i++) {
+    eloszl->tomb[i].intervallum = hist->tomb[i].intervallum;
+    for (size_t j = 0; j <= i; j++) {
       eloszl->tomb[i].elemszam += hist->tomb[j].elemszam;
     }
   }
@@ -142,19 +142,22 @@ void kumul_eloszlas(histogram *hist, histogram *eloszl) {
 void uj_ertek(histogram *eloszl, histogram *uj, size_t total) {
   uj->tomb = (hist_elem *)malloc(sizeof(hist_elem) * eloszl->elemszam);
   uj->elemszam = eloszl->elemszam;
-  for(size_t i=0;i<uj->elemszam;i++){
-    uj->tomb[i].elemszam =(size_t)floor(255 * ((double)eloszl->tomb[i].elemszam / total));
-    printf("%zu %zu %f\n", i, uj->tomb[i].elemszam,(double)eloszl->tomb[i].elemszam / total); 
+  for (size_t i = 0; i < uj->elemszam; i++) {
+    uj->tomb[i].elemszam =
+        (size_t)floor(255 * ((double)eloszl->tomb[i].elemszam / total));
+    printf("%zu %zu %f\n", i, uj->tomb[i].elemszam,
+           (double)eloszl->tomb[i].elemszam / total);
     uj->tomb[i].intervallum = eloszl->tomb[i].intervallum;
   }
 }
 void normalize(t_kep *eredeti, t_kep *uj, histogram *uj_ertekek) {
-  unsigned char * uj_tomb = (unsigned char *)malloc(sizeof(unsigned char) * eredeti->elemszam);
+  unsigned char *uj_tomb =
+      (unsigned char *)malloc(sizeof(unsigned char) * eredeti->elemszam);
   uj->tomb = uj_tomb;
   uj->szelesseg = eredeti->szelesseg;
   uj->magassag = eredeti->magassag;
   uj->elemszam = eredeti->elemszam;
-  for(size_t i=0; i<eredeti->elemszam;i++){
+  for (size_t i = 0; i < eredeti->elemszam; i++) {
     unsigned char eredeti_ertek = eredeti->tomb[i];
     unsigned char norm_ertek = uj_ertekek->tomb[eredeti_ertek].elemszam;
     uj->tomb[i] = norm_ertek;
@@ -162,7 +165,8 @@ void normalize(t_kep *eredeti, t_kep *uj, histogram *uj_ertekek) {
 }
 void kiiras(t_kep *kep, char *fajlnev) {
   FILE *fp = fopen(fajlnev, "w");
-  for(size_t i=0; i < kep->elemszam; i++) {
-    fprintf(fp,"%d\n", kep->tomb[i]);}
+  for (size_t i = 0; i < kep->elemszam; i++) {
+    fprintf(fp, "%d\n", kep->tomb[i]);
+  }
   fclose(fp);
 }
