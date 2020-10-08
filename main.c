@@ -40,6 +40,7 @@ struct _s_hist {
 };
 
 void betoltes(t_kep *, char *);
+void betolt_rgb(t_rgb *, char *);
 void hisztogram_keszit(t_kep *, histogram *, unsigned int);
 void histogram_kiir(histogram *, char *);
 void kumul_eloszlas(histogram *, histogram *);
@@ -314,4 +315,51 @@ unsigned char _calc_B(size_t y, size_t cb, size_t cr) {
   unsigned char _cb = ((unsigned int)(516.412 * cb)) >> 8;
   return _y + _cb - 276.863;
 }
+void betolt_rgb(t_rgb *r, char *fajlnev) {
+  int szelesseg = 0, magassag = 0;
+  size_t idx = 0;
+  for (idx = 0; idx < strlen(fajlnev) - 1; idx++) {
+    if (fajlnev[idx] <= '9' && fajlnev[idx] >= '0' && fajlnev[idx + 1] == 'x') {
+      idx++;
+      break;
+    }
+  }
+  int i = idx - 1;
+  int j = idx + 1;
+  while (fajlnev[i] <= '9' && fajlnev[i] >= '0') {
+    i--;
+  }
+  while (fajlnev[j] <= '9' && fajlnev[j] >= '0') {
+    j++;
+  }
+  for (size_t i_m = i + 1; i_m < idx; i_m++) {
+    magassag *= 10;
+    magassag += fajlnev[i_m] - 48;
+  }
+  for (size_t i_s = idx + 1; i_s < j; i_s++) {
+    szelesseg *= 10;
+    szelesseg += fajlnev[i_s] - 48;
+  }
 
+  printf("[ DEBUG ][ KEP ][ SZELESSEG ]:%d\n", szelesseg);
+  printf("[ DEBUG ][ KEP ][ MAGASSAG ]:%d\n", magassag);
+
+  r->szelesseg = szelesseg;
+  r->magassag = magassag;
+  r->elemszam = szelesseg * magassag;
+  r->r = (unsigned char *)malloc(sizeof(unsigned char) * (szelesseg * magassag));
+  r->g = (unsigned char *)malloc(sizeof(unsigned char) * (szelesseg * magassag));
+  r->b = (unsigned char *)malloc(sizeof(unsigned char) * (szelesseg * magassag));
+
+  FILE *fp = fopen(fajlnev, "r");
+  if (NULL == fp)
+    return;
+  int _r, _g, _b;
+  for (size_t i = 0; i < (szelesseg * magassag); i++) {
+    fscanf(fp, " %d %d, %d", &_r, &_g, &_b);
+    r->r[i] = (unsigned char) _r;
+    r->g[i] = (unsigned char) _g;
+    r->b[i] = (unsigned char) _b;
+  }
+  fclose(fp);
+}
