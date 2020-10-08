@@ -42,4 +42,4 @@ $(OBJECT_FILES): $(OBJ)/%.o: $(SRC)/%.c
 	@$(CC) $(CFLAGS) -o $@ $<
 
 run: $(EXECUTABLE_FILES)
-	./bin/${EXECUTABLE_NAME} ./photo1c1280x720.dat
+	./bin/${EXECUTABLE_NAME} ./photo1c1280x720.dat ./wall506x338.dat

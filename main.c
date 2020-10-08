@@ -46,17 +46,12 @@ void histogram_kiir(histogram *, char *);
 void kumul_eloszlas(histogram *, histogram *);
 void uj_ertek(histogram *, histogram *, size_t);
 void normalize(t_kep *, t_kep *, histogram *);
+void normalize_RGB(t_rgb *);
 void kiiras(t_kep *, char *);
-void _convert_RGbtoYCrCb(t_rgb *, t_ycrcb *);
-unsigned char _calc_Y(size_t, size_t, size_t);
-unsigned char _calc_Cb(size_t, size_t, size_t);
-unsigned char _calc_Cr(size_t, size_t, size_t);
-unsigned char _calc_R(size_t y, size_t cb, size_t cr);
-unsigned char _calc_G(size_t y, size_t cb, size_t cr);
-unsigned char _calc_B(size_t y, size_t cb, size_t cr);
+void kiir_rgb(t_rgb *, char *);
 
 int main(int argc, char *argv[]) {
-  if (argc < 2)
+  if (argc < 3)
     return -1;
   char fajlnev[strlen(argv[1] + 1)];
   strcpy(fajlnev, argv[1]);
@@ -88,6 +83,12 @@ int main(int argc, char *argv[]) {
   histogram_kiir(&uj_hist, "fajlnev_hist.dat");
   histogram_kiir(&uj_eloszl, "fajlnev_kum.dat");
 
+  t_rgb rgb;
+  betolt_rgb(&rgb, argv[2]);
+  normalize_RGB(&rgb);
+  kiir_rgb(&rgb, "screenshot480x270_norm.dat");
+  
+
   free(hist.tomb);
   free(hist_16.tomb);
   free(uj_hist.tomb);
@@ -96,6 +97,7 @@ int main(int argc, char *argv[]) {
   free(kep.tomb);
   free(uj_kep.tomb);
   free(uj_ertekek.tomb);
+  free(rgb.r);free(rgb.g);free(rgb.b);
   return 0;
 }
 
@@ -209,112 +211,6 @@ void kiiras(t_kep *kep, char *fajlnev) {
   fclose(fp);
 }
 
-/** Convert RGB to YCrCb
- *
- * Converts 8bit integer RGB values to YCrCb colorspace.
- */
-void _convert_RGbtoYCrCb(t_rgb *r, t_ycrcb *y) {
-  free(y->y);
-  free(y->cb);
-  free(y->cr);
-  y->elemszam = r->elemszam;
-  y->szelesseg = r->szelesseg;
-  y->magassag = r->magassag;
-
-  y->y = (unsigned char *)malloc(sizeof(unsigned char *) * y->elemszam);
-  y->cb = (unsigned char *)malloc(sizeof(unsigned char *) * y->elemszam);
-  y->cr = (unsigned char *)malloc(sizeof(unsigned char *) * y->elemszam);
-
-  for(size_t i=0; i < r->elemszam; i++) {
-   y->y[i]  = _calc_Y(r->r[i], r->g[i], r->b[i]);
-   y->cb[i] = _calc_Y(r->r[i], r->g[i], r->b[i]);
-   y->cr[i] = _calc_Y(r->r[i], r->g[i], r->b[i]);
-  }
-}
-void _convert_YCrCbtoRGB(t_ycrcb *y, t_rgb *r) {
-  free(r->r);
-  free(r->b);
-  free(r->g);
-  r->elemszam = y->elemszam;
-  r->szelesseg = y->szelesseg;
-  r->magassag = y->magassag;
-
-  r->r = (unsigned char *)malloc(sizeof(unsigned char *) * y->elemszam);
-  r->g = (unsigned char *)malloc(sizeof(unsigned char *) * y->elemszam);
-  r->b = (unsigned char *)malloc(sizeof(unsigned char *) * y->elemszam);
-
-  for(size_t i=0; i < r->elemszam; i++) {
-   r->r[i] = _calc_R(y->y[i], y->cb[i], y->cr[i]);
-   r->g[i] = _calc_G(y->y[i], y->cb[i], y->cr[i]);
-   r->b[i] = _calc_B(y->y[i], y->cb[i], y->cr[i]);
-  }
-}
-
-void normalize_RGB(t_rgb *kep) {
-  t_ycrcb Y;
-  _convert_RGbtoYCrCb(kep, &Y);
-  histogram Y_hist, Y_elosz, Y_uj;
-  t_kep Y_kep, Y_kep_uj;
-  Y_kep.elemszam = kep->elemszam;
-  Y_kep.szelesseg = kep->szelesseg;
-  Y_kep.magassag = kep->magassag;
-  Y_kep.tomb = (unsigned char *)malloc(sizeof(unsigned char)*kep->elemszam);
-  for(size_t i=0; i < kep->elemszam; i++) {
-    Y_kep.tomb[i] = Y.y[i];
-  }
-
-  hisztogram_keszit( &Y_kep, &Y_hist, 256);
-  kumul_eloszlas(&Y_hist, &Y_elosz);
-  uj_ertek(&Y_elosz, &Y_uj, Y_kep.elemszam);
-  normalize(&Y_kep, &Y_kep_uj, &Y_uj);
-
-  for(size_t i=0; i < kep->elemszam; i++) {
-    Y.y[i] = Y_kep_uj.tomb[i];
-  }
-  _convert_YCrCbtoRGB( &Y, kep);
-  free(Y.cb);free(Y.cr);free(Y.y);
-  free(Y_hist.tomb); free(Y_elosz.tomb); free(Y_uj.tomb);
-  free(Y_kep.tomb); free(Y_kep_uj.tomb);
-}
-
-
-
-unsigned char _calc_Y(size_t r, size_t g, size_t b) {
-  unsigned char _r = ((unsigned int)(65.738 * (r/256))) >> 8;
-  unsigned char _g = ((unsigned int)(129.057 * (r/256))) >> 8;
-  unsigned char _b = ((unsigned int)(25.064 * (r/256))) >> 8;
-  return 16 + _r + _g + _b;
-}
-
-unsigned char _calc_Cb(size_t r, size_t g, size_t b) {
-  unsigned char _r = ((unsigned int)(37.945 * (r/256))) >> 8;
-  unsigned char _g = ((unsigned int)(74.494 * (r/256))) >> 8;
-  unsigned char _b = ((unsigned int)(112.439 * (r/256))) >> 8;
-  return 128 - _r - _g + _b;
-}
-unsigned char _calc_Cr(size_t r, size_t g, size_t b) {
-  unsigned char _r = ((unsigned int)(112.439 * (r/256))) >> 8;
-  unsigned char _g = ((unsigned int)(94.154 * (r/256))) >> 8;
-  unsigned char _b = ((unsigned int)(18.285 * (r/256))) >> 8;
-  return 128 + _r - _g - _b;
-}
-
-unsigned char _calc_R(size_t y, size_t cb, size_t cr) {
-  unsigned char _y = ((unsigned int)(298.082 * y)) >> 8;
-  unsigned char _cr = ((unsigned int)(408.583 * cr)) >> 8;
-  return _y + _cr - 222.921;
-}
-unsigned char _calc_G(size_t y, size_t cb, size_t cr) {
-  unsigned char _y = ((unsigned int)(298.082 * y)) >> 8;
-  unsigned char _cb = ((unsigned int)(100.291 * cb)) >> 8;
-  unsigned char _cr = ((unsigned int)(208.120 * cr)) >> 8;
-  return _y - _cb - _cr + 135.576;
-}
-unsigned char _calc_B(size_t y, size_t cb, size_t cr) {
-  unsigned char _y = ((unsigned int)(298.082 * y)) >> 8;
-  unsigned char _cb = ((unsigned int)(516.412 * cb)) >> 8;
-  return _y + _cb - 276.863;
-}
 void betolt_rgb(t_rgb *r, char *fajlnev) {
   int szelesseg = 0, magassag = 0;
   size_t idx = 0;
@@ -360,6 +256,15 @@ void betolt_rgb(t_rgb *r, char *fajlnev) {
     r->r[i] = (unsigned char) _r;
     r->g[i] = (unsigned char) _g;
     r->b[i] = (unsigned char) _b;
+  }
+  fclose(fp);
+}
+void kiir_rgb(t_rgb *r, char *fajlnev) {
+  FILE *fp = fopen(fajlnev, "w");
+  if ( NULL == fp)
+    return;
+  for(size_t i=0; i < r->elemszam; i++) {
+    fprintf( fp, "%d %d %d\n", r->r[i], r->g[i], r->b[i]);
   }
   fclose(fp);
 }
