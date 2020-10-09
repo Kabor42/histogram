@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
   t_rgb rgb;
   betolt_rgb(&rgb, argv[2]);
   normalize_RGB(&rgb);
-  kiir_rgb(&rgb, "screenshot480x270_norm.dat");
+  kiir_rgb(&rgb, argv[2]);
   
 
   free(hist.tomb);
@@ -268,3 +268,42 @@ void kiir_rgb(t_rgb *r, char *fajlnev) {
   }
   fclose(fp);
 }
+void normalize_RGB(t_rgb *r) {
+
+  t_kep _r, _g, _b;
+  _r.tomb=r->r; _r.elemszam=r->elemszam;
+  _g.tomb = r->g; _g.elemszam=r->elemszam;
+  _b.tomb = r->b; _b.elemszam=r->elemszam;
+
+  histogram h_r, h_g, h_b;
+  hisztogram_keszit(&_r, &h_r, 256);
+  hisztogram_keszit(&_g, &h_g, 256);
+  hisztogram_keszit(&_b, &h_b, 256);
+
+  histogram k_r, k_g, k_b;
+  histogram u_r, u_g, u_b;
+
+  kumul_eloszlas(&h_r, &k_r);
+  kumul_eloszlas(&h_g, &k_g);
+  kumul_eloszlas(&h_b, &k_b);
+
+  uj_ertek(&k_r, &u_r, r->elemszam);
+  uj_ertek(&k_g, &u_g, r->elemszam);
+  uj_ertek(&k_b, &u_b, r->elemszam);
+
+  t_kep uj_r, uj_g, uj_b;
+  normalize(&_r, &uj_r, &u_r);
+  normalize(&_g, &uj_g, &u_g);
+  normalize(&_b, &uj_b, &u_b);
+  free(h_r.tomb); free(h_g.tomb); free(h_b.tomb);
+  free(k_r.tomb); free(k_g.tomb); free(k_b.tomb);
+  free(u_r.tomb); free(u_g.tomb); free(u_b.tomb);
+
+  for(size_t i=0; i<r->elemszam; i++){
+    r->r[i] = uj_r.tomb[i];
+    r->g[i] = uj_g.tomb[i];
+    r->b[i] = uj_b.tomb[i];
+  }
+  free(uj_r.tomb); free(uj_g.tomb); free(uj_b.tomb);
+}
+
