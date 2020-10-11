@@ -260,7 +260,15 @@ void betolt_rgb(t_rgb *r, char *fajlnev) {
   fclose(fp);
 }
 void kiir_rgb(t_rgb *r, char *fajlnev) {
-  FILE *fp = fopen(fajlnev, "w");
+  size_t str_idx = strlen(fajlnev);
+  char uj_fajl[str_idx + 5];
+  strncpy(uj_fajl, fajlnev, str_idx - 4);
+  uj_fajl[str_idx - 4]='\0';
+  strcat(uj_fajl, "_new");
+  strcat(uj_fajl, ".dat");
+  printf("Uj fajl: %s\n", uj_fajl);
+
+  FILE *fp = fopen(uj_fajl, "w");
   if ( NULL == fp)
     return;
   for(size_t i=0; i < r->elemszam; i++) {
