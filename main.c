@@ -42,13 +42,14 @@ struct _s_hist {
 void betoltes(t_kep *, char *);
 void betolt_rgb(t_rgb *, char *);
 void hisztogram_keszit(t_kep *, histogram *, unsigned int);
-void histogram_kiir(histogram *, char *);
+void histogram_kiir(histogram *, char *, char *);
 void kumul_eloszlas(histogram *, histogram *);
 void uj_ertek(histogram *, histogram *, size_t);
 void normalize(t_kep *, t_kep *, histogram *);
 void normalize_RGB(t_rgb *);
 void kiiras(t_kep *, char *);
 void kiir_rgb(t_rgb *, char *);
+char* strAddExtension(char *, char *);
 
 int main(int argc, char *argv[]) {
   if (argc < 3)
@@ -64,15 +65,15 @@ int main(int argc, char *argv[]) {
   betoltes(&kep, fajlnev);
 
   hisztogram_keszit(&kep, &hist_16, 16);
-  histogram_kiir(&hist_16, "hist.dat");
+  histogram_kiir(&hist_16, fajlnev, "_hist_16");
 
   hisztogram_keszit(&kep, &hist, 256);
   kumul_eloszlas(&hist, &eloszl);
-  histogram_kiir(&hist, "photo1c1280x720_hist.dat");
-  histogram_kiir(&eloszl, "kum.dat");
+  histogram_kiir(&hist, fajlnev, "_hist_256");
+  histogram_kiir(&eloszl, fajlnev,"_kum_eredeti");
 
   uj_ertek(&eloszl, &uj_ertekek, kep.elemszam);
-  histogram_kiir(&uj_ertekek, "u.dat");
+  histogram_kiir(&uj_ertekek, fajlnev,"_uj_ertekek");
 
   normalize(&kep, &uj_kep, &uj_ertekek);
 
@@ -80,14 +81,14 @@ int main(int argc, char *argv[]) {
 
   hisztogram_keszit(&uj_kep, &uj_hist, 256);
   kumul_eloszlas(&uj_hist, &uj_eloszl);
-  histogram_kiir(&uj_hist, "fajlnev_hist.dat");
-  histogram_kiir(&uj_eloszl, "fajlnev_kum.dat");
+  histogram_kiir(&uj_hist, fajlnev,"_hist_256_u");
+  histogram_kiir(&uj_eloszl, fajlnev,"_kum_uj");
 
   t_rgb rgb;
   betolt_rgb(&rgb, argv[2]);
   normalize_RGB(&rgb);
   kiir_rgb(&rgb, argv[2]);
-  
+
 
   free(hist.tomb);
   free(hist_16.tomb);
@@ -159,8 +160,9 @@ void hisztogram_keszit(t_kep *kep, histogram *hiszt, unsigned int osztas) {
     hiszt->tomb[idx].elemszam++;
   }
 }
-void histogram_kiir(histogram *hiszt, char *fajlnev) {
-  FILE *fp = fopen(fajlnev, "w");
+void histogram_kiir(histogram *hiszt, char *fajlnev, char *arg) {
+  char *uj_fajl = strAddExtension(fajlnev, arg);
+  FILE *fp = fopen(uj_fajl, "w");
   if (NULL == fp)
     return;
   for (size_t i = 0; i < hiszt->elemszam; i++) {
@@ -168,6 +170,7 @@ void histogram_kiir(histogram *hiszt, char *fajlnev) {
             hiszt->tomb[i].elemszam);
   }
   fclose(fp);
+  free(uj_fajl);
 }
 void kumul_eloszlas(histogram *hist, histogram *eloszl) {
   eloszl->tomb = (hist_elem *)malloc(sizeof(hist_elem) * hist->elemszam);
@@ -252,7 +255,7 @@ void betolt_rgb(t_rgb *r, char *fajlnev) {
     return;
   int _r, _g, _b;
   for (size_t i = 0; i < (szelesseg * magassag); i++) {
-    fscanf(fp, " %d %d, %d", &_r, &_g, &_b);
+    fscanf(fp, "%d %d %d ", &_r, &_g, &_b);
     r->r[i] = (unsigned char) _r;
     r->g[i] = (unsigned char) _g;
     r->b[i] = (unsigned char) _b;
@@ -260,28 +263,38 @@ void betolt_rgb(t_rgb *r, char *fajlnev) {
   fclose(fp);
 }
 void kiir_rgb(t_rgb *r, char *fajlnev) {
-  size_t str_idx = strlen(fajlnev);
-  char uj_fajl[str_idx + 5];
-  strncpy(uj_fajl, fajlnev, str_idx - 4);
-  uj_fajl[str_idx - 4]='\0';
-  strcat(uj_fajl, "_new");
-  strcat(uj_fajl, ".dat");
-  printf("Uj fajl: %s\n", uj_fajl);
+  char* uj_fajl = strAddExtension(fajlnev, "_new");
 
   FILE *fp = fopen(uj_fajl, "w");
   if ( NULL == fp)
     return;
   for(size_t i=0; i < r->elemszam; i++) {
-    fprintf( fp, "%d %d %d\n", r->r[i], r->g[i], r->b[i]);
+    fprintf( fp, " %d %d %d \n", r->r[i], r->g[i], r->b[i]);
   }
   fclose(fp);
+  free(uj_fajl);
 }
 void normalize_RGB(t_rgb *r) {
 
   t_kep _r, _g, _b;
-  _r.tomb=r->r; _r.elemszam=r->elemszam;
-  _g.tomb = r->g; _g.elemszam=r->elemszam;
-  _b.tomb = r->b; _b.elemszam=r->elemszam;
+  _r.szelesseg = r->szelesseg;
+  _r.magassag = r->magassag;
+  _r.elemszam=r->elemszam;
+  _r.tomb = (unsigned char *) malloc(sizeof(unsigned char) * _r.elemszam);
+  _g.szelesseg = r->szelesseg;
+  _g.magassag = r->magassag;
+  _g.elemszam=r->elemszam;
+  _g.tomb = (unsigned char *) malloc(sizeof(unsigned char) * _g.elemszam);
+  _b.szelesseg = r->szelesseg;
+  _b.magassag = r->magassag;
+  _b.elemszam=r->elemszam;
+  _b.tomb = (unsigned char *) malloc(sizeof(unsigned char) * _b.elemszam);
+
+  for(size_t i=0; i < r->elemszam; i++) {
+    _r.tomb[i] = r->r[i];
+    _g.tomb[i] = r->g[i];
+    _b.tomb[i] = r->b[i];
+  }
 
   histogram h_r, h_g, h_b;
   hisztogram_keszit(&_r, &h_r, 256);
@@ -299,19 +312,27 @@ void normalize_RGB(t_rgb *r) {
   uj_ertek(&k_g, &u_g, r->elemszam);
   uj_ertek(&k_b, &u_b, r->elemszam);
 
-  t_kep uj_r, uj_g, uj_b;
-  normalize(&_r, &uj_r, &u_r);
-  normalize(&_g, &uj_g, &u_g);
-  normalize(&_b, &uj_b, &u_b);
+  histogram_kiir(&h_r, "2B525x311.dat", "_r_hist");
+  histogram_kiir(&u_r, "2B525x311.dat", "_r_uni_hist");
+
+  free(_r.tomb); free(_g.tomb); free(_b.tomb);
   free(h_r.tomb); free(h_g.tomb); free(h_b.tomb);
   free(k_r.tomb); free(k_g.tomb); free(k_b.tomb);
-  free(u_r.tomb); free(u_g.tomb); free(u_b.tomb);
 
-  for(size_t i=0; i<r->elemszam; i++){
-    r->r[i] = uj_r.tomb[i];
-    r->g[i] = uj_g.tomb[i];
-    r->b[i] = uj_b.tomb[i];
+  for (size_t i = 0; i < r->elemszam; i++) {
+    r->r[i] = u_r.tomb[r->r[i]].elemszam;
+    r->g[i] = u_g.tomb[r->g[i]].elemszam;
+    r->b[i] = u_b.tomb[r->b[i]].elemszam;
   }
-  free(uj_r.tomb); free(uj_g.tomb); free(uj_b.tomb);
+  free(u_r.tomb); free(u_g.tomb); free(u_b.tomb);
 }
-
+char* strAddExtension(char *str, char *arg) {
+  size_t str_idx = strlen(str);
+  char* uj_fajl = (char *) malloc(sizeof(char) * (str_idx + strlen(arg) + 1));
+  strncpy(uj_fajl, str, str_idx - 4);
+  uj_fajl[str_idx - 4]='\0';
+  strcat(uj_fajl, arg);
+  strcat(uj_fajl, ".dat");
+  printf("[ DEBUG ][ KIIR ][ NEW ] %s\n", uj_fajl);
+  return uj_fajl;
+}

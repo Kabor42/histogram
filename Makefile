@@ -20,14 +20,13 @@ build: $(EXECUTABLE_FILES)
 clean:
 	@echo Cleaning directories.
 	@rm -r -f $(BIN)
-	@rm -f fajlnev_hist.dat
-	@rm -f fájlnév
-	@rm -f fajlnev_hist.dat
-	@rm -f fajlnev_kum.dat
-	@rm -f hist.dat
-	@rm -f kum.dat
-	@rm -f photo1c1280x720_hist.dat
-	@rm -f u.dat
+	@rm *_new.dat
+	@rm *_hist_16.dat
+	@rm *_hist_256.dat
+	@rm *_hist_256_u.dat
+	@rm *_kum_eredeti.dat
+	@rm *_kum_uj.dat
+	@rm *_uj_ertekek.dat
 	@echo Cleaning done.
 
 .PHONY: build clean
