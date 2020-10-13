@@ -132,8 +132,8 @@ void betoltes(t_kep *kep, char *fajlnev) {
     szelesseg += fajlnev[i_s] - 48;
   }
 
-  printf("[ DEBUG ][ KEP ][ SZELESSEG ]:%d\n", szelesseg);
-  printf("[ DEBUG ][ KEP ][ MAGASSAG ]:%d\n", magassag);
+  /*printf("[ DEBUG ][ KEP ][ SZELESSEG ]:%d\n", szelesseg);*/
+  /*printf("[ DEBUG ][ KEP ][ MAGASSAG ]:%d\n", magassag);*/
   unsigned char *uj_tomb =
       (unsigned char *)malloc(sizeof(unsigned char) * (szelesseg * magassag));
   kep->tomb = uj_tomb;
@@ -241,8 +241,8 @@ void betolt_rgb(t_rgb *r, char *fajlnev) {
     szelesseg += fajlnev[i_s] - 48;
   }
 
-  printf("[ DEBUG ][ KEP ][ SZELESSEG ]:%d\n", szelesseg);
-  printf("[ DEBUG ][ KEP ][ MAGASSAG ]:%d\n", magassag);
+  /*printf("[ DEBUG ][ KEP ][ SZELESSEG ]:%d\n", szelesseg);*/
+  /*printf("[ DEBUG ][ KEP ][ MAGASSAG ]:%d\n", magassag);*/
 
   r->szelesseg = szelesseg;
   r->magassag = magassag;
@@ -342,6 +342,6 @@ char *strAddExtension(char *str, char *arg) {
   uj_fajl[str_idx - 4] = '\0';
   strcat(uj_fajl, arg);
   strcat(uj_fajl, ".dat");
-  printf("[ DEBUG ][ KIIR ][ NEW ] %s\n", uj_fajl);
+  /*printf("[ DEBUG ][ KIIR ][ NEW ] %s\n", uj_fajl);*/
   return uj_fajl;
 }
