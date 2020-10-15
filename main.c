@@ -52,11 +52,10 @@ void kiir_rgb(t_rgb *, char *);
 char *strAddExtension(char *, char *);
 
 int main(int argc, char *argv[]) {
-  if (argc < 3)
+  if (argc < 2)
     return -1;
   char fajlnev[strlen(argv[1] + 1)];
   strcpy(fajlnev, argv[1]);
-  printf("%s\n", fajlnev);
 
   t_kep kep, uj_kep;
   histogram hist_16, hist, uj_hist;
@@ -84,10 +83,15 @@ int main(int argc, char *argv[]) {
   histogram_kiir(&uj_hist, fajlnev, "_hist_256_u");
   histogram_kiir(&uj_eloszl, fajlnev, "_kum_uj");
 
-  t_rgb rgb;
-  betolt_rgb(&rgb, argv[2]);
-  normalize_RGB(&rgb);
-  kiir_rgb(&rgb, argv[2]);
+  if (argc == 3) {
+    t_rgb rgb;
+    betolt_rgb(&rgb, argv[2]);
+    normalize_RGB(&rgb);
+    kiir_rgb(&rgb, argv[2]);
+    free(rgb.r);
+    free(rgb.g);
+    free(rgb.b);
+  }
 
   free(hist.tomb);
   free(hist_16.tomb);
@@ -97,9 +101,6 @@ int main(int argc, char *argv[]) {
   free(kep.tomb);
   free(uj_kep.tomb);
   free(uj_ertekek.tomb);
-  free(rgb.r);
-  free(rgb.g);
-  free(rgb.b);
   return 0;
 }
 
