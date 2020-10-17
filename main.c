@@ -3,41 +3,43 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct _s_hist_elem hist_elem;
-typedef struct _s_kep t_kep;
-typedef struct _s_rgb t_rgb;
-typedef struct _s_ycrcb t_ycrcb;
-typedef struct _s_hist histogram;
-struct _s_kep {
-  unsigned char *tomb;
-  size_t szelesseg;
-  size_t magassag;
-  size_t elemszam;
-};
-struct _s_rgb {
-  unsigned char *r;
-  unsigned char *g;
-  unsigned char *b;
-  size_t szelesseg;
-  size_t magassag;
-  size_t elemszam;
-};
-struct _s_ycrcb {
-  unsigned char *y;
-  unsigned char *cr;
-  unsigned char *cb;
-  size_t szelesseg;
-  size_t magassag;
-  size_t elemszam;
-};
-struct _s_hist_elem {
-  unsigned char intervallum;
-  size_t elemszam;
-};
-struct _s_hist {
-  hist_elem *tomb;
-  size_t elemszam;
-};
+/** Szurke kep tarolas.
+ *
+ * Egy dinamikus tombben tarolt kep struktura.
+ * Konyebb igy kezelni mintha mindig csak tombkent latnank.
+ */
+typedef struct _s_kep {
+  unsigned char *tomb; ///< Kep taroloeleme.
+  size_t szelesseg;    ///< Kep szelessege.
+  size_t magassag;     ///< Kep magassaga.
+  size_t elemszam;     ///< Tomb elemszama.
+} t_kep;
+/** RGB kep tarolasa.
+ * Lehetne akar tobb t_kep strukturat tarolni.
+ */
+typedef struct _s_rgb {
+  unsigned char *r; ///< Voros kep tarolasa.
+  unsigned char *g; ///< Zold elem tarolasa.
+  unsigned char *b; ///< Kek elem tarolasa.
+  size_t szelesseg; ///< Kep szelessege.
+  size_t magassag;  ///< Kep magassaga.
+  size_t elemszam;  ///< Tomb Kep elemszama.
+} t_rgb;
+/** Hisztogram elem.
+ * Intervallum es elemszam paros.
+ */
+typedef struct _s_hist_elem {
+  unsigned char intervallum; ///< Intervallum kozep erteke.
+  size_t elemszam;           ///< Mennyi elemet tartalmaz.
+} hist_elem;
+/** Hisztogram struktura.
+ * Bin-nek megfelelo elemszam.
+ * Akar at is lehetne nevezni.
+ */
+typedef struct _s_hist {
+  hist_elem *tomb; ///< Hiszt elemek tombje.
+  size_t elemszam; ///< Bin-nyi elem.
+} histogram;
 
 void betoltes(t_kep *, char *);
 void betolt_rgb(t_rgb *, char *);
