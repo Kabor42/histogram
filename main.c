@@ -41,16 +41,86 @@ typedef struct _s_hist {
   size_t elemszam; ///< Bin-nyi elem.
 } histogram;
 
+/** Szurke kep betoltese fajlbol.
+ *
+ * A fuggveny a fajlnevbol automatikusan lekeri a kep nagysagat.
+ * Megfelelo formatum lehet: \w+\d{1,4}x\d{1,4}.dat
+ * A kepek numpy-bol dtype=uint8 exportalassal mentsuk.
+ *
+ * @param kep ahova beolvassuk.
+ * @param fajlnev ahonnan beolvasunk.
+ */
 void betoltes(t_kep *, char *);
+/** Szines kep betoltese fajlbol.
+ *
+ * A fuggveny a fajlnevbol automatikusan lekeri a kep nagysagat.
+ * Megfelelo formatum lehet: \w+\d{1,4}x\d{1,4}.dat
+ * A kepek numpy-bol dtype=uint8 exportalassal mentsuk.
+ *
+ * @param kep ahova beolvassuk.
+ * @param fajlnev ahonnan beolvasunk.
+ */
 void betolt_rgb(t_rgb *, char *);
+/** Hisztogram keszitse.
+ *
+ * @param kep amibol keszitjuk a hisztorgrammot.
+ * @param hiszt amibe elkeszitjuk.
+ * @param osztas mennyi egysegre osztunk.
+ */
 void hisztogram_keszit(t_kep *, histogram *, unsigned int);
+/** Hisztogram kiirasa fajlba.
+ *
+ * @param hiszt amit kiirunk.
+ * @param fajnev ahova kiirunk.
+ * @param arg appendix a fajlnevhez.
+ */
 void histogram_kiir(histogram *, char *, char *);
+/** Kumulativ eloszlas szamolasa.
+ *
+ * @param hiszt amibol keszitjuk.
+ * @param eloszl amibe keszitjuk.
+ */
 void kumul_eloszlas(histogram *, histogram *);
+/** Uj pixel ertekek szamolasa.
+ *
+ * @param eloszl kumulativ eloszlas.
+ * @param uj uj ertekek, szinten hisztogram.
+ * @param total elemszam, szelesseg x magassag.
+ */
 void uj_ertek(histogram *, histogram *, size_t);
+/** Hisztogtam kiegyenlites a kepen az uj ertekek alapjan.
+ *
+ * @param eredeti eredeti kep.
+ * @param uj uj kep ami normalizalt.
+ * @param uj_ertekek uj pixel ertekek hisztogramja.
+ */
 void normalize(t_kep *, t_kep *, histogram *);
+/** Szines kep normalizalasa.
+ *
+ * Fontos! Felulirja az eredeti kepet.
+ * @param r kep.
+ */
 void normalize_RGB(t_rgb *);
+/** Szurke kep kiirasa fajlba sorfolytonosan.
+ *
+ * @param kep kep amit kiirunk.
+ * @param fajlnev.
+ */
 void kiiras(t_kep *, char *);
+/** Szines kep kiirasa fajlba.
+ *
+ * @param kep.
+ * @param fajlnev.
+ */
 void kiir_rgb(t_rgb *, char *);
+/** Fajlnev vegehez ad egy szovegreszt.
+ *
+ * Segedfuggveny, hogy ne kelljen mindig uj fajlnevet begepelni.
+ *
+ * @param str fajlnev.
+ * @param srg hozzakapcsolt szoveg.
+ * @return fajlv hozzakapcsolt szoveggel.
+ */
 char *strAddExtension(char *, char *);
 
 int main(int argc, char *argv[]) {
