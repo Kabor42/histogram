@@ -95,6 +95,12 @@ void uj_ertek(histogram *, histogram *, size_t);
  * @param uj_ertekek uj pixel ertekek hisztogramja.
  */
 void normalize(t_kep *, t_kep *, histogram *);
+/** Normalizalas folyamata.
+ *
+ * @param kep.
+ * @param fajlnev.
+ */
+void doNormalize(t_kep *, char *);
 /** Szines kep normalizalasa.
  *
  * Fontos! Felulirja az eredeti kepet.
@@ -126,34 +132,10 @@ char *strAddExtension(char *, char *);
 int main(int argc, char *argv[]) {
   if (argc < 2)
     return -1;
-  char fajlnev[strlen(argv[1] + 1)];
-  strcpy(fajlnev, argv[1]);
 
-  t_kep kep, uj_kep;
-  histogram hist_16, hist, uj_hist;
-  histogram eloszl, uj_eloszl;
-  histogram uj_ertekek;
-  betoltes(&kep, fajlnev);
-
-  hisztogram_keszit(&kep, &hist_16, 16);
-  histogram_kiir(&hist_16, fajlnev, "_hist_16");
-
-  hisztogram_keszit(&kep, &hist, 256);
-  kumul_eloszlas(&hist, &eloszl);
-  histogram_kiir(&hist, fajlnev, "_hist_256");
-  histogram_kiir(&eloszl, fajlnev, "_kum_eredeti");
-
-  uj_ertek(&eloszl, &uj_ertekek, kep.elemszam);
-  histogram_kiir(&uj_ertekek, fajlnev, "_uj_ertekek");
-
-  normalize(&kep, &uj_kep, &uj_ertekek);
-
-  kiiras(&uj_kep, "fájlnév");
-
-  hisztogram_keszit(&uj_kep, &uj_hist, 256);
-  kumul_eloszlas(&uj_hist, &uj_eloszl);
-  histogram_kiir(&uj_hist, fajlnev, "_hist_256_u");
-  histogram_kiir(&uj_eloszl, fajlnev, "_kum_uj");
+  t_kep kep;
+  betoltes(&kep, argv[1]);
+  doNormalize(&kep, argv[1]);
 
   if (argc == 3) {
     t_rgb rgb;
@@ -165,14 +147,6 @@ int main(int argc, char *argv[]) {
     free(rgb.b);
   }
 
-  free(hist.tomb);
-  free(hist_16.tomb);
-  free(uj_hist.tomb);
-  free(eloszl.tomb);
-  free(uj_eloszl.tomb);
-  free(kep.tomb);
-  free(uj_kep.tomb);
-  free(uj_ertekek.tomb);
   return 0;
 }
 
@@ -180,6 +154,16 @@ void betoltes(t_kep *kep, char *fajlnev) {
   FILE *fp = fopen(fajlnev, "r");
   if (NULL == fp)
     return;
+  /* Itt egy magassag es szelesseg kivonast kiserelek meg szovegbol.
+   *
+   * Az algorritmusom:
+   * 1. Megkeresem annak az 'x' karakternek a helyet ami elott szamjegy all.
+   * 2. Beallitok egy-egy idexet a megtalalt 'x' karakter ele es utan.
+   * 3. Az 'x' karakter elotti indexet addig csokkentem ami szamjegyet talal.
+   * 4. Az 'x' karakter utani indexet addig novelem ami szam van.
+   * 5. A karakter elott megtalalt szamot beirom a magassag valtozoba.
+   * 6. A karakter utan megtalalt szamot beirom a szelssegebe.
+   */
   int szelesseg = 0, magassag = 0;
   size_t idx = 0;
   for (idx = 0; idx < strlen(fajlnev) - 1; idx++) {
@@ -280,6 +264,41 @@ void normalize(t_kep *eredeti, t_kep *uj, histogram *uj_ertekek) {
     uj->tomb[i] = norm_ertek;
   }
 }
+void doNormalize(t_kep *kep, char *fajlnev){
+  t_kep uj_kep;
+  histogram hist_16, hist, uj_hist;
+  histogram eloszl, uj_eloszl;
+  histogram uj_ertekek;
+  betoltes(kep, fajlnev);
+
+  hisztogram_keszit(kep, &hist_16, 16);
+  histogram_kiir(&hist_16, fajlnev, "_hist_16");
+
+  hisztogram_keszit(kep, &hist, 256);
+  kumul_eloszlas(&hist, &eloszl);
+  histogram_kiir(&hist, fajlnev, "_hist_256");
+  histogram_kiir(&eloszl, fajlnev, "_kum_eredeti");
+
+  uj_ertek(&eloszl, &uj_ertekek, kep->elemszam);
+  histogram_kiir(&uj_ertekek, fajlnev, "_uj_ertekek");
+
+  normalize(kep, &uj_kep, &uj_ertekek);
+
+  kiiras(&uj_kep, "fájlnév");
+
+  hisztogram_keszit(&uj_kep, &uj_hist, 256);
+  kumul_eloszlas(&uj_hist, &uj_eloszl);
+  histogram_kiir(&uj_hist, fajlnev, "_hist_256_u");
+  histogram_kiir(&uj_eloszl, fajlnev, "_kum_uj");
+
+  free(hist.tomb);
+  free(hist_16.tomb);
+  free(uj_hist.tomb);
+  free(eloszl.tomb);
+  free(uj_eloszl.tomb);
+  free(uj_kep.tomb);
+  free(uj_ertekek.tomb);
+}
 void kiiras(t_kep *kep, char *fajlnev) {
   FILE *fp = fopen(fajlnev, "w");
   for (size_t i = 0; i < kep->elemszam; i++) {
@@ -291,6 +310,16 @@ void kiiras(t_kep *kep, char *fajlnev) {
 void betolt_rgb(t_rgb *r, char *fajlnev) {
   int szelesseg = 0, magassag = 0;
   size_t idx = 0;
+  /* Itt egy magassag es szelesseg kivonast kiserelek meg szovegbol.
+   *
+   * Az algorritmusom:
+   * 1. Megkeresem annak az 'x' karakternek a helyet ami elott szamjegy all.
+   * 2. Beallitok egy-egy idexet a megtalalt 'x' karakter ele es utan.
+   * 3. Az 'x' karakter elotti indexet addig csokkentem ami szamjegyet talal.
+   * 4. Az 'x' karakter utani indexet addig novelem ami szam van.
+   * 5. A karakter elott megtalalt szamot beirom a magassag valtozoba.
+   * 6. A karakter utan megtalalt szamot beirom a szelssegebe.
+   */
   for (idx = 0; idx < strlen(fajlnev) - 1; idx++) {
     if (fajlnev[idx] <= '9' && fajlnev[idx] >= '0' && fajlnev[idx + 1] == 'x') {
       idx++;
