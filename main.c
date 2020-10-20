@@ -134,8 +134,8 @@ int main(int argc, char *argv[]) {
     return -1;
 
   t_kep kep;
-  betoltes(&kep, argv[1]);
   doNormalize(&kep, argv[1]);
+  free(kep.tomb);
 
   if (argc == 3) {
     t_rgb rgb;
@@ -191,16 +191,14 @@ void betoltes(t_kep *kep, char *fajlnev) {
 
   /*printf("[ DEBUG ][ KEP ][ SZELESSEG ]:%d\n", szelesseg);*/
   /*printf("[ DEBUG ][ KEP ][ MAGASSAG ]:%d\n", magassag);*/
-  unsigned char *uj_tomb =
-      (unsigned char *)malloc(sizeof(unsigned char) * (szelesseg * magassag));
-  kep->tomb = uj_tomb;
+  kep->tomb = (unsigned char *)malloc(sizeof(unsigned char) * (szelesseg * magassag));
   kep->magassag = magassag;
   kep->szelesseg = szelesseg;
   kep->elemszam = magassag * szelesseg;
   int item;
   for (size_t i = 0; i < (szelesseg * magassag); i++) {
     fscanf(fp, " %d", &item);
-    uj_tomb[i] = (unsigned char)item;
+    kep->tomb[i] = (unsigned char)item;
   }
   fclose(fp);
 }
@@ -264,7 +262,7 @@ void normalize(t_kep *eredeti, t_kep *uj, histogram *uj_ertekek) {
     uj->tomb[i] = norm_ertek;
   }
 }
-void doNormalize(t_kep *kep, char *fajlnev){
+void doNormalize(t_kep *kep, char *fajlnev) {
   t_kep uj_kep;
   histogram hist_16, hist, uj_hist;
   histogram eloszl, uj_eloszl;

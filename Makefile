@@ -1,4 +1,5 @@
-CC=gcc
+# CC=gcc
+CC=clang
 CFLAGS=-c -Wall -Werror -pedantic -std=gnu99 -g -ggdb
 LDFLAGS= -lm
 EXECUTABLE_NAME=hist_eq
@@ -41,4 +42,5 @@ $(OBJECT_FILES): $(OBJ)/%.o: $(SRC)/%.c
 	@$(CC) $(CFLAGS) -o $@ $<
 
 run: $(EXECUTABLE_FILES)
-	./bin/${EXECUTABLE_NAME} lena256x256.dat 2B525x311.dat
+	@echo Running ${EXECUTABLE_NAME}
+	@./bin/${EXECUTABLE_NAME} lena256x256.dat 2B525x311.dat
