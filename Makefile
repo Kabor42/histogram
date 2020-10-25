@@ -44,3 +44,6 @@ $(OBJECT_FILES): $(OBJ)/%.o: $(SRC)/%.c
 run: $(EXECUTABLE_FILES)
 	@echo Running ${EXECUTABLE_NAME}
 	@./bin/${EXECUTABLE_NAME} lena256x256.dat 2B525x311.dat
+	@./bin/${EXECUTABLE_NAME} photo1c1280x720.dat Auronzo1280x720rgb.dat
+	@./bin/${EXECUTABLE_NAME} photo2c1280x720.dat Braies1280x720rgb.dat
+	@./bin/${EXECUTABLE_NAME} secret1280x720.dat

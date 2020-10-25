@@ -111,8 +111,9 @@ void normalize_RGB(t_rgb *);
  *
  * @param kep kep amit kiirunk.
  * @param fajlnev.
+ * @param toldalek.
  */
-void kiiras(t_kep *, char *);
+void kiiras(t_kep *, char *, char *);
 /** Szines kep kiirasa fajlba.
  *
  * @param kep.
@@ -130,8 +131,15 @@ void kiir_rgb(t_rgb *, char *);
 char *strAddExtension(char *, char *);
 
 int main(int argc, char *argv[]) {
-  if (argc < 2)
+  if (argc < 2) {
+    printf("Hasznlat: ./bin/hist_eq <kepfajl> (opcionalis)<rgb_kepfajl>\n\n");
+    printf("                        kepfajl:\trelativ vagy abszolut utvonal.\n");
+    printf("                                \tuint_8 tipus .dat\n");
+    printf("                        rgb_kepfajl:\trelativ vagy abszolut utvonal.\n");
+    printf("                                \tuint_8 tipus .dat\n");
+    printf("                                \topcionalis.\n");
     return -1;
+  }
 
   t_kep kep;
   doNormalize(&kep, argv[1]);
@@ -282,7 +290,7 @@ void doNormalize(t_kep *kep, char *fajlnev) {
 
   normalize(kep, &uj_kep, &uj_ertekek);
 
-  kiiras(&uj_kep, "fájlnév");
+  kiiras(&uj_kep, fajlnev, "_ujj_kep");
 
   hisztogram_keszit(&uj_kep, &uj_hist, 256);
   kumul_eloszlas(&uj_hist, &uj_eloszl);
@@ -297,8 +305,9 @@ void doNormalize(t_kep *kep, char *fajlnev) {
   free(uj_kep.tomb);
   free(uj_ertekek.tomb);
 }
-void kiiras(t_kep *kep, char *fajlnev) {
-  FILE *fp = fopen(fajlnev, "w");
+void kiiras(t_kep *kep, char *fajlnev, char *arg) {
+  char *uj_fajl = strAddExtension(fajlnev, arg);
+  FILE *fp = fopen(uj_fajl, "w");
   for (size_t i = 0; i < kep->elemszam; i++) {
     fprintf(fp, "%d\n", kep->tomb[i]);
   }
